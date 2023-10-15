@@ -7,9 +7,9 @@ import java.util.Stack;
 
 
 public class Interpreter {
-    // HashMap of variables in target file in format <name, value>.
+    // HashMap of declared variables format <name, value>.
     static HashMap<String, Integer> variables = new HashMap<String, Integer>();
-    // ArrayList to store every line in target file.
+    // ArrayList to read target file into.
     static ArrayList<String> fileStringArr = new ArrayList<String>();
     // Stacks to store the line index and variable being used in the condition of the current while loop.
     static Stack<Integer> loopLineIdx = new Stack<Integer>();
@@ -17,7 +17,7 @@ public class Interpreter {
     static Integer currentLineIdx = 0;
 
     // Reads target file into memory; each line becomes a string.
-    static void ParseFile(String fileName) {
+    static void parseFile(String fileName) {
         try {
             File file = new File(fileName);
             Scanner scanner = new Scanner(file);
@@ -25,10 +25,9 @@ public class Interpreter {
             while (scanner.hasNextLine()) {
                 String nextLine = scanner.nextLine();
                 // Leading whitespace is removed.
-                nextLine.stripLeading();
                 fileStringArr.add(nextLine.stripLeading());
             }
-    
+
             scanner.close();
 
         } catch (FileNotFoundException e) {
@@ -36,24 +35,27 @@ public class Interpreter {
         }
     }
 
-    // Executes each line.
-    static void ProcessLine(String line) {
+    // Executes a line of code.
+    static void processLine(String line) {
         String[] words = line.split("[;: ]");
         String command = words[0];
 
         if (command.equals("clear")) {
-            DeclareVar(words[1]);
+            declareVar(words[1]);
         } else if (command.equals("incr")) {
-            IncrVar(words[1]);
+            incrVar(words[1]);
         } else if (command.equals("decr")) {
-            DecrVar(words[1]);
+            decrVar(words[1]);
+        // When a loop is reached, the line number and variable being compared to 0 are pushed onto respective stacks.
         } else if (command.equals("while")) {
             loopLineIdx.push(currentLineIdx);
             loopVarName.push(words[1]);
         } else if (command.equals("end")) {
+            // If the condition of the loop is true, end the loop by removing it from the stacks. Continue.
             if (variables.get(loopVarName.peek()) == 0) {
                 loopLineIdx.pop();
                 loopVarName.pop();
+            // If the condition is false, go to the saved line number.
             } else {
                 currentLineIdx = loopLineIdx.peek();
             }
@@ -71,27 +73,27 @@ public class Interpreter {
 
 
     // Function to declare a variable.
-    static void DeclareVar(String name) {
+    static void declareVar(String name) {
         variables.put(name, 0);
     }
 
 
     // Function to increment a variable.
-    static void IncrVar(String name) {
+    static void incrVar(String name) {
         variables.put(name, variables.get(name) + 1);
     }
 
 
     // Function to decrement a variable.
-    static void DecrVar(String name) {
+    static void decrVar(String name) {
         variables.put(name, variables.get(name) - 1);
     }
 
     // Main loop; executes the line referenced by currentLineIdx until the end of the file is reached.
     public static void main(String[] args) {
-        ParseFile(args[0]);
+        parseFile(args[0]);
         while (currentLineIdx < fileStringArr.size()) {
-            ProcessLine(fileStringArr.get(currentLineIdx));
+            processLine(fileStringArr.get(currentLineIdx));
             currentLineIdx++;
         }
     }
