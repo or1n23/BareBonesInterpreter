@@ -41,7 +41,7 @@ public class Interpreter {
         String command = words[0];
 
         if (command.equals("clear")) {
-            declareVar(words[1]);
+            clearVar(words[1]);
         } else if (command.equals("incr")) {
             incrVar(words[1]);
         } else if (command.equals("decr")) {
@@ -73,7 +73,7 @@ public class Interpreter {
 
 
     // Function to declare a variable.
-    static void declareVar(String name) {
+    static void clearVar(String name) {
         variables.put(name, 0);
     }
 
@@ -86,7 +86,13 @@ public class Interpreter {
 
     // Function to decrement a variable.
     static void decrVar(String name) {
-        variables.put(name, variables.get(name) - 1);
+        Integer value = variables.get(name);
+        if ((value - 1) >= 0) {
+            variables.put(name, variables.get(name) - 1);
+        } else {
+            System.out.println("Variables cannot be negative. Program execution terminated.");
+            System.exit(0);
+        }
     }
 
     // Main loop; executes the line referenced by currentLineIdx until the end of the file is reached.
